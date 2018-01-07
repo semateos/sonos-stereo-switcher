@@ -22,6 +22,7 @@ decode_results results;
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 int lastButtonState;
+boolean sending = false;
 
 void setup()
 {
@@ -46,11 +47,15 @@ void setup()
 
 void repeatIR(unsigned long hexCommand) {
 
+  //sending = true;
+  
   for (int i = 0; i < 4; i++) {
     
     irsend.sendNEC(hexCommand, 32);
     delay(100); // Wait a bit between retransmissions
   }
+  
+  irrecv.enableIRIn();
 }
 
 // Storage for the recorded code
@@ -63,6 +68,9 @@ int toggle = 0; // The RC5/6 toggle state
 // Stores the code for later playback
 // Most of this code is just logging
 void storeCode(decode_results *results) {
+
+  //Serial.println("Decoding IR input");
+  
   codeType = results->decode_type;
   //int count = results->rawlen;
   if (codeType == UNKNOWN) {
@@ -154,8 +162,10 @@ void loop() {
 
   lastButtonState = buttonState;
 
+  //Serial.println("Checking IR in");
   //watch for IR in
   if (irrecv.decode(&results)) {
+    Serial.println("IR decode results");
     digitalWrite(STATUS_PIN, HIGH);
     storeCode(&results);
     irrecv.resume(); // resume receiver
@@ -165,20 +175,20 @@ void loop() {
   // print the string when a newline arrives:
   if (stringComplete) {
     
-    Serial.println("Received: " + inputString);
+    Serial.print("Received: " + inputString);
 
     if(inputString == "CD\n"){
 
       repeatIR(CD_MODE);
       
-      Serial.println("Switched to: " + inputString);
+      Serial.print("Switched to: " + inputString);
     }
 
     if(inputString == "V2\n"){
 
       repeatIR(V2_MODE);
       
-      Serial.println("Switched to: " + inputString);
+      Serial.print("Switched to: " + inputString);
     }
     
     // clear the string:

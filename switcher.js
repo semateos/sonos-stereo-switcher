@@ -29,11 +29,17 @@ try{
 
     var respond = function(data){
 
-      console.log(data);
+      console.log("Serial Data:", data);
+      //console.log();
 
       if(data.includes('Serial Connected!')){
 
         connected = true;
+      }
+
+      if(data.includes('Received SONY:')){
+
+        console.log("Received Sony Wake IR");
       }
     }
 
