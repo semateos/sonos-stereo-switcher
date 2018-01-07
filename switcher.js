@@ -10,7 +10,7 @@ var lastPlayState = '';
 
 var getZoneStatus = function(zoneName, callback){
 
-    var url = 'http://localhost:5005/' + zoneName + '/state';
+    var url = 'http://mini:5005/' + zoneName + '/state';
 
     getJSON(url, callback);
 }
@@ -20,7 +20,7 @@ var getZoneStatus = function(zoneName, callback){
 try{
 
     port = new SerialPort('/dev/cu.usbmodem1421', {
-      baudRate: 57600
+      baudRate: 9600
     });
 
     port.pipe(parser);
