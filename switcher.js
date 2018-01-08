@@ -18,6 +18,23 @@ SerialPort.list(function(error, list){
 
   console.log('Ports:', list);
 
+  for(var i = 0; i < list.length; i++){
+
+    var portDetail = list[i];
+
+    if(portDetail.manufacturer && portDetail.manufacturer.includes('Arduino')){
+
+      port = portDetail.comName;
+
+      connectSerial(port);
+
+      return;
+
+    }
+  }
+
+  console.log('No Arduino found');
+
 });
 
 
