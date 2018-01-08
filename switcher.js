@@ -8,6 +8,19 @@ var port = false;
 var stereoMode = '';
 var lastPlayState = '';
 
+SerialPort.list(function(error, list){
+
+  if(error){
+
+    console.log(error);
+    return;
+  }
+
+  console.log('Ports:', list);
+
+});
+
+
 var getZoneStatus = function(zoneName, callback){
 
     var url = 'http://mini:5005/' + zoneName + '/state';
@@ -21,75 +34,6 @@ var pauseZone = function(zoneName, callback){
 
     getJSON(url, callback);
 }
-
-//open serial connection to Arduino
-try{
-
-    port = new SerialPort('/dev/cu.usbmodem621', {
-      baudRate: 9600
-    });
-
-    port.pipe(parser);
-
-    var connected = false;
-
-    var respond = function(data){
-
-      console.log("Serial Data:", data);
-      //console.log();
-
-      if(data.includes('Serial Connected!')){
-
-        connected = true;
-      }
-
-      if(data.includes('Received SONY:')){
-
-        console.log("Received Sony Wake IR");
-
-        pauseZone('3rd Floor',function (error, result) {
-
-            if (error) {
-                // Notify the error:
-                Console.log(error);
-                return;
-            }
-        });
-      }
-    }
-
-    parser.on('data', respond);
-
-}catch(error){
-
-    console.log(error);
-}
-
-var switchToMode = function(mode){
-
-  port.write(mode + '\n', function(err) {
-
-    if (err) {
-
-      return console.log('Error on write: ', err.message);
-    }
-
-    console.log('Sent ' + mode + ' Command');
-
-    stereoMode = mode;
-
-    return false;
-  });
-
-  port.drain();
-}
-
-
-
-// Open errors will be emitted as an error event
-port.on('error', function(err) {
-  console.log('Error: ', err.message);
-});
 
 
 //start polling 3rd floor status
@@ -132,4 +76,77 @@ polling.on('result', function (result) {
 
 });
 
-polling.run(); // Let's start polling.
+
+
+//open serial connection to Arduino
+
+var connectSerial = function(portName){
+
+  try{
+
+      port = new SerialPort(portName, {
+        baudRate: 9600
+      });
+
+      port.pipe(parser);
+
+      var connected = false;
+
+      var respond = function(data){
+
+        console.log("Serial Data:", data);
+        //console.log();
+
+        if(data.includes('Serial Connected!')){
+
+          connected = true;
+        }
+
+        if(data.includes('Received SONY:')){
+
+          console.log("Received Sony Wake IR");
+
+          pauseZone('3rd Floor',function (error, result) {
+
+              if (error) {
+                  // Notify the error:
+                  Console.log(error);
+                  return;
+              }
+          });
+        }
+      }
+
+      // Open errors will be emitted as an error event
+      port.on('error', function(err) {
+        console.log('Error: ', err.message);
+      });
+
+      parser.on('data', respond);
+
+      polling.run(); // Let's start polling.
+
+  }catch(error){
+
+      console.log(error);
+  }
+}
+
+var switchToMode = function(mode){
+
+  port.write(mode + '\n', function(err) {
+
+    if (err) {
+
+      return console.log('Error on write: ', err.message);
+    }
+
+    console.log('Sent ' + mode + ' Command');
+
+    stereoMode = mode;
+
+    return false;
+  });
+
+  port.drain();
+}
