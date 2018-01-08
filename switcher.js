@@ -15,11 +15,17 @@ var getZoneStatus = function(zoneName, callback){
     getJSON(url, callback);
 }
 
+var pauseZone = function(zoneName, callback){
+
+    var url = 'http://mini:5005/' + zoneName + '/pause';
+
+    getJSON(url, callback);
+}
 
 //open serial connection to Arduino
 try{
 
-    port = new SerialPort('/dev/cu.usbmodem1421', {
+    port = new SerialPort('/dev/cu.usbmodem621', {
       baudRate: 9600
     });
 
@@ -40,6 +46,15 @@ try{
       if(data.includes('Received SONY:')){
 
         console.log("Received Sony Wake IR");
+
+        pauseZone('3rd Floor',function (error, result) {
+
+            if (error) {
+                // Notify the error:
+                Console.log(error);
+                return;
+            }
+        });
       }
     }
 
